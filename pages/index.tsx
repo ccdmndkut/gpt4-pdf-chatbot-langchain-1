@@ -15,8 +15,29 @@ import {
 
 export default function Home() {
   const [query, setQuery] = useState<string>('');
+  const [namespace, setNamespace] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  async function handleFileUpload(e) {
+    e.preventDefault();
+    const file = e.target.elements.file.files[0];
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('namespace', namespace);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      console.log(data);
+     e.target.elements.file.value = null;
+    } catch (error) {
+      console.error(error);
+    }
+  }
   const [messageState, setMessageState] = useState<{
     messages: Message[];
     pending?: string;
@@ -77,6 +98,7 @@ export default function Home() {
         body: JSON.stringify({
           question,
           history,
+          namespace
         }),
       });
       const data = await response.json();
@@ -230,6 +252,17 @@ export default function Home() {
                     onChange={(e) => setQuery(e.target.value)}
                     className={styles.textarea}
                   />
+                  <br />
+                  <input
+                    type="text"
+                    name="namespace"
+                    placeholder="Enter namespace"
+                    value={namespace}
+                    onChange={(e) => setNamespace(e.target.value)}
+                    className={styles.textarea}
+                    style={{ width: '30%' }}
+                  />
+
                   <button
                     type="submit"
                     disabled={loading}
@@ -250,6 +283,12 @@ export default function Home() {
                       </svg>
                     )}
                   </button>
+                </form>
+                <form onSubmit={handleFileUpload}>
+                  <input multiple type="file" className={styles.textarea}
+                    style={{ width: '30%' }} name="file" />
+                  <button type="submit"
+                  >Upload</button>
                 </form>
               </div>
             </div>

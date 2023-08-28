@@ -5,16 +5,18 @@ import { pinecone } from '@/utils/pinecone-client';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { TextLoader } from "langchain/document_loaders/fs/text";
 
 /* Name of directory to retrieve your files from 
    Make sure to add your PDF files inside the 'docs' folder
 */
 const filePath = 'docs';
 
-export const run = async () => {
+export const run = async (namespace) => {
   try {
     /*load raw docs from the all files in the directory */
     const directoryLoader = new DirectoryLoader(filePath, {
+      ".txt": (path) => new TextLoader(path),
       '.pdf': (path) => new PDFLoader(path),
     });
 
@@ -34,11 +36,12 @@ export const run = async () => {
     /*create and store the embeddings in the vectorStore*/
     const embeddings = new OpenAIEmbeddings();
     const index = pinecone.Index(PINECONE_INDEX_NAME); //change to your own index name
+    console.log('ingestion complete');
 
     //embed the PDF documents
-    await PineconeStore.fromDocuments(docs, embeddings, {
+    return await PineconeStore.fromDocuments(docs, embeddings, {
       pineconeIndex: index,
-      namespace: PINECONE_NAME_SPACE,
+      namespace: namespace || PINECONE_NAME_SPACE,
       textKey: 'text',
     });
   } catch (error) {
@@ -46,8 +49,9 @@ export const run = async () => {
     throw new Error('Failed to ingest your data');
   }
 };
+export default run;
 
-(async () => {
-  await run();
-  console.log('ingestion complete');
-})();
+// (async () => {
+//   await run();
+//   console.log('ingestion complete');
+// })();

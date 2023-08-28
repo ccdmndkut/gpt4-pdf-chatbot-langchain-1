@@ -10,7 +10,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const { question, history } = req.body;
+const { question, history, namespace } = req.body; // Add namespace here
+
 
   console.log('question', question);
   console.log('history', history);
@@ -36,7 +37,7 @@ export default async function handler(
       {
         pineconeIndex: index,
         textKey: 'text',
-        namespace: PINECONE_NAME_SPACE, //namespace comes from your config folder
+        namespace: namespace, //namespace comes from your config folder
       },
     );
 
