@@ -15,6 +15,7 @@ import {
 
 export default function Home() {
   const [query, setQuery] = useState<string>('');
+  const [namespaces, setNamespaces] = useState<Array<string>>([]);
   const [namespace, setNamespace] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export default function Home() {
       });
       const data = await response.json();
       console.log(data);
-     e.target.elements.file.value = null;
+      e.target.elements.file.value = null;
     } catch (error) {
       console.error(error);
     }
@@ -59,6 +60,17 @@ export default function Home() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    async function getNames() {
+      const response = await fetch('/api/getnames', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setNamespaces(data);
+    }
+    getNames();
     textAreaRef.current?.focus();
   }, []);
 
@@ -98,7 +110,7 @@ export default function Home() {
         body: JSON.stringify({
           question,
           history,
-          namespace
+          namespace,
         }),
       });
       const data = await response.json();
@@ -253,15 +265,19 @@ export default function Home() {
                     className={styles.textarea}
                   />
                   <br />
-                  <input
-                    type="text"
+                  <select
                     name="namespace"
-                    placeholder="Enter namespace"
                     value={namespace}
                     onChange={(e) => setNamespace(e.target.value)}
                     className={styles.textarea}
                     style={{ width: '30%' }}
-                  />
+                  >
+                    {namespaces.map((n, i) => (
+                      <option key={i} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
 
                   <button
                     type="submit"
@@ -285,10 +301,14 @@ export default function Home() {
                   </button>
                 </form>
                 <form onSubmit={handleFileUpload}>
-                  <input multiple type="file" className={styles.textarea}
-                    style={{ width: '30%' }} name="file" />
-                  <button type="submit"
-                  >Upload</button>
+                  <input
+                    multiple
+                    type="file"
+                    className={styles.textarea}
+                    style={{ width: '30%' }}
+                    name="file"
+                  />
+                  <button type="submit">Upload</button>
                 </form>
               </div>
             </div>

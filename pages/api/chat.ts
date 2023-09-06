@@ -10,8 +10,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-const { question, history, namespace } = req.body; // Add namespace here
-
+  const { question, history, namespace } = req.body; // Add namespace here
 
   console.log('question', question);
   console.log('history', history);
@@ -51,11 +50,10 @@ const { question, history, namespace } = req.body; // Add namespace here
         return new AIMessage(message);
       }
     });
-
     //Ask a question using chat history
     const response = await chain.call({
       question: sanitizedQuestion,
-      chat_history: pastMessages
+      chat_history: pastMessages,
     });
 
     console.log('response', response);
